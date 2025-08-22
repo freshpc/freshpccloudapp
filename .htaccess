@@ -1,0 +1,18 @@
+DirectoryIndex index.php
+
+# Force PHP processing
+AddType application/x-httpd-php .php
+
+RewriteEngine On
+
+# Static assets - serve directly
+RewriteCond %{REQUEST_URI} ^/(assets|images|css|js|fonts|favicon\.ico) [NC]
+RewriteRule ^ - [L]
+
+# Existing files and directories - serve directly  
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Everything else goes through index.php
+RewriteRule ^(.*)$ index.php [QSA,L]
