@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Account Activeren – FreshPC Cloud</title>
+  <link rel="icon" href="/images/favicon.ico">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <h2>FreshPC Cloud</h2>
+        <span>Field Engineering</span>
+      </div>
+      <div class="nav-menu">
+        <a class="nav-link" href="/">Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container login-container">
+    <div class="login-form-container">
+      <div class="login-header">
+        <h2>Account Activeren</h2>
+        <p>Stel uw nieuwe wachtwoord in</p>
+      </div>
+
+      <form id="activationForm" class="login-form">
+        <input type="hidden" id="token" name="token">
+        
+        <div class="form-group">
+          <label for="newPassword">Nieuw Wachtwoord</label>
+          <div class="password-input-group">
+            <input type="password" id="newPassword" name="newPassword" required minlength="8">
+            <button type="button" id="toggleNewPw" class="btn-password-toggle">Toon</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Bevestig Wachtwoord</label>
+          <div class="password-input-group">
+            <input type="password" id="confirmPassword" name="confirmPassword" required minlength="8">
+            <button type="button" id="toggleConfirmPw" class="btn-password-toggle">Toon</button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-block">Account Activeren</button>
+        </div>
+      </form>
+
+      <div id="activationError" class="error-message" style="display: none;"></div>
+      <div id="activationSuccess" class="success-message" style="display: none;"></div>
+    </div>
+  </main>
+
+  <script src="/assets/activate.js"></script>
+</body>
+</html>
