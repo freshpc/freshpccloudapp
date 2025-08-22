@@ -89,12 +89,12 @@ if (!function_exists('pdo')) {
   }
 }
 function task_log(PDO $pdo, int $task_id, string $event, string $details=''): void {
-  try { $pdo->prepare("INSERT INTO task_events (task_id,event,details) VALUES (?,?,?)")->execute([$task_id,$event,$details]); } catch(Throwable $e){}
+  try { $pdo->prepare("INSERT INTO task_events (task_id,event_type,payload) VALUES (?,?,?)")->execute([$task_id,$event,$details]); } catch(Throwable $e){}
 }
 function client_full_address_by_id(PDO $pdo, ?int $client_id): string {
   if (!$client_id) return '';
   try{
-    $st=$pdo->prepare("SELECT COALESCE(address,'') f, COALESCE(city,'') c, COALESCE(postal_code,'') pc, COALESCE(country,'') co FROM clients WHERE id=? LIMIT 1");
+    $st=$pdo->prepare("SELECT COALESCE(address_street,'') f, COALESCE(address_city,'') c, COALESCE(address_postcode,'') pc, COALESCE(address_country,'') co FROM clients WHERE id=? LIMIT 1");
     $st->execute([$client_id]); $c=$st->fetch(); if(!$c) return '';
     $parts=[]; foreach (['f','c','pc','co'] as $k){ $v=trim((string)($c[$k]??'')); if($v!=='') $parts[]=$v; }
     return trim(implode(' ', $parts));
@@ -313,13 +313,13 @@ if (strpos($norm, '/api/') === 0) {
     // --- Clients ---
     if ($norm==='/api/clients' && $method==='GET'){
       api_need_auth(); // zowel admin als engineer mogen lijst lezen (alleen admin wijzigt)
-      $st=$pdo->query("SELECT id, name, company_name, first_name, last_name, email, phone, address, notes, created_at, address_city, address_postcode, address_country FROM clients ORDER BY id DESC");
+      $st=$pdo->query("SELECT id, name, company_name, first_name, last_name, email, phone, address_street, address_number, address_postcode, address_city, address_country, notes, created_at FROM clients ORDER BY id DESC");
       json_out($st->fetchAll());
     }
     if ($norm==='/api/clients' && $method==='POST'){
       api_need_admin();
       $in=json_decode(file_get_contents('php://input'),true)?:[];
-      $fields=['name','company_name','first_name','last_name','email','phone','address','address_city','address_postcode','address_country','notes'];
+      $fields=['name','company_name','first_name','last_name','email','phone','address_street','address_number','address_postcode','address_city','address_country','notes'];
       $cols=[];$vals=[];$ph=[];
       foreach($fields as $f){ if(array_key_exists($f,$in)){ $cols[]=$f; $vals[]=$in[$f]; $ph[]='?'; } }
       if(!$cols) json_out(['error'=>'no fields'],400);
@@ -484,7 +484,7 @@ if (strpos($norm, '/api/') === 0) {
                c.name as client_name,
                c.email as client_email,
                c.phone as client_phone,
-               c.address as client_address,
+               CONCAT(COALESCE(c.address_street,''), ' ', COALESCE(c.address_number,''), ', ', COALESCE(c.address_postcode,''), ' ', COALESCE(c.address_city,''), ', ', COALESCE(c.address_country,'')) as client_address,
                $nameConcat as engineer_name,
                u.email as engineer_email
         FROM tasks t 
@@ -842,7 +842,7 @@ if (strpos($norm, '/api/') === 0) {
       $clientName=''; $clientEmail=''; $addr='';
       if (!empty($row['client_id'])){
         try{
-          $cst=$pdo->prepare("SELECT CONCAT(COALESCE(first_name,''), ' ', COALESCE(last_name,'')) as name, email, COALESCE(address,'') f, COALESCE(city,'') c, COALESCE(postal_code,'') pc, COALESCE(country,'') co FROM clients WHERE id=? LIMIT 1");
+          $cst=$pdo->prepare("SELECT CONCAT(COALESCE(first_name,''), ' ', COALESCE(last_name,'')) as name, email, COALESCE(address_street,'') f, COALESCE(address_city,'') c, COALESCE(address_postcode,'') pc, COALESCE(address_country,'') co FROM clients WHERE id=? LIMIT 1");
           $cst->execute([(int)$row['client_id']]); $cl=$cst->fetch();
           if($cl){
             $clientName=(string)($cl['name']??''); $clientEmail=(string)($cl['email']??'');
