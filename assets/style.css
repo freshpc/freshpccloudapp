@@ -1306,3 +1306,11 @@ footer {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
   }
 }
+.history-list { display: flex; flex-direction: column; gap: 1em; }
+.history-card {
+  border: 1px solid #ccc;
+  padding: 1em;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}

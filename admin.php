@@ -1,15 +1,31 @@
-<?php require_once 'config.php'; ?>
+<?php
+// admin.php v23 | Full user/client add/edit/delete, AJAX forms | est lines: ~275 | Author: franklos
+
+<?php
+require_once 'config.php';
+session_start();
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: /login.php');
+    exit;
+}
+
+
+?>
 <!doctype html>
 <html lang="nl">
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Admin – <?php echo COMPANY_NAME; ?></title>
   <link rel="icon" type="image/x-icon" href="<?php echo ADMIN_FAVICON; ?>">
   <link rel="stylesheet" href="/style.css">
   <?php echo generateDynamicCSS(); ?>
 </head>
-<body>
+<body style="display:none;">
   <nav class="navbar header">
     <div class="nav-container">
       <div class="nav-logo">
@@ -24,7 +40,6 @@
       </div>
     </div>
   </nav>
-
   <main class="container admin-container">
     <nav class="admin-nav">
       <button class="nav-btn active" data-section="tasks">Taken</button>
@@ -39,53 +54,14 @@
       <div class="section-header">
         <h2>Nieuwe taak</h2>
       </div>
-      <form id="taskForm" class="task-form">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="title">Titel</label>
-            <input id="title" name="title" required>
-          </div>
-          <div class="form-group">
-            <label for="client_id">Klant</label>
-            <select id="client_id" name="client_id" required></select>
-          </div>
-          <div class="form-group">
-            <label for="assigned_user_id">Engineer</label>
-            <select id="assigned_user_id" name="assigned_user_id" required></select>
-          </div>
-          <div class="form-group">
-            <label for="priority">Prioriteit</label>
-            <select id="priority" name="priority">
-              <option value="low">Laag</option>
-              <option value="medium" selected>Middel</option>
-              <option value="high">Hoog</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="scheduled_date">Gepland (DD-MM-YYYY HH:MM)</label>
-            <input id="scheduled_date" name="scheduled_date" placeholder="20-08-2025 10:00:00">
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="description">Omschrijving</label>
-          <textarea id="description" name="description"></textarea>
-        </div>
-        <div class="form-buttons">
-          <button type="submit" class="btn btn-primary">Opslaan</button>
-          <span id="taskMsg" class="error"></span>
-        </div>
-      </form>
-    </section>
-
-    <section class="content-section" style="margin-top:2rem;">
-      <div class="section-header">
-        <h2>Taken</h2>
-      </div>
       <div class="table-wrap">
         <table id="tasksTable">
-          <thead><tr>
-            <th>ID</th><th>Titel</th><th>Klant</th><th>Engineer</th><th>Prioriteit</th><th>Gepland</th><th>Adres</th>
-          </tr></thead>
+          <thead>
+            <tr>
+              <th>ID</th><th>Titel</th><th>Klant</th><th>Engineer</th>
+              <th>Prioriteit</th><th>Gepland</th><th>Adres</th>
+            </tr>
+          </thead>
           <tbody></tbody>
         </table>
       </div>
@@ -95,15 +71,47 @@
     <section id="clients-section" class="content-section" style="margin-top:2rem; display:none;">
       <div class="section-header">
         <h2>Klanten beheren</h2>
+        <button id="addClientBtn" class="btn btn-primary">Klant toevoegen</button>
       </div>
       <div class="table-wrap">
         <table id="clientsTable">
           <thead>
-            <tr><th>ID</th><th>Naam</th><th>E-mail</th><th>Telefoon</th><th>Plaats</th><th>Aangemaakt</th><th>Acties</th></tr>
+            <tr>
+              <th>ID</th><th>Naam</th><th>E-mail</th><th>Telefoon</th>
+              <th>Plaats</th><th>Aangemaakt</th><th>Acties</th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
+      <!-- Add/Edit Client Form -->
+      <form id="editClientForm" style="display:none; margin-top:1em; background:#f9f9f9; padding:1em; border-radius:6px; max-width:400px;">
+        <h3 id="clientFormTitle">Klant toevoegen</h3>
+        <input type="hidden" id="editClientId" name="client_id">
+        <div>
+          <label for="editClientName">Naam</label>
+          <input type="text" id="editClientName" name="name" required>
+        </div>
+        <div>
+          <label for="editClientEmail">E-mail</label>
+          <input type="email" id="editClientEmail" name="email">
+        </div>
+        <div>
+          <label for="editClientPhone">Telefoon</label>
+          <input type="text" id="editClientPhone" name="phone">
+        </div>
+        <div>
+          <label for="editClientCity">Plaats</label>
+          <input type="text" id="editClientCity" name="address_city">
+        </div>
+        <div>
+          <label for="editClientPostcode">Postcode</label>
+          <input type="text" id="editClientPostcode" name="address_postcode">
+        </div>
+        <div id="editClientMsg" style="color:#d00;margin-top:0.5em;"></div>
+        <button type="submit" class="btn btn-primary">Opslaan</button>
+        <button type="button" id="cancelEditClientBtn" class="btn">Annuleren</button>
+      </form>
     </section>
 
     <!-- User Management Section -->
@@ -112,35 +120,43 @@
         <h2>Gebruikers beheren</h2>
         <button id="addUserBtn" class="btn btn-primary">Nieuwe gebruiker</button>
       </div>
-      
       <div class="table-wrap">
         <table id="usersTable">
           <thead>
-            <tr><th>ID</th><th>Gebruikersnaam</th><th>E-mail</th><th>Naam</th><th>Rol</th><th>Geactiveerd</th><th>Acties</th></tr>
+            <tr>
+              <th>ID</th><th>Gebruikersnaam</th><th>E-mail</th><th>Naam</th>
+              <th>Rol</th><th>Geactiveerd</th><th>Acties</th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
-
-      <form id="userForm" class="task-form" style="display:none; margin-top:2rem;">
+      <!-- Add/Edit User Form -->
+      <form id="userForm" style="display:none; margin-top:1em; background:#f9f9f9; padding:1em; border-radius:6px; max-width:400px;">
         <h3 id="userFormTitle">Nieuwe gebruiker</h3>
-        <div class="form-row">
-          <div class="form-group"><label for="uusername">Gebruikersnaam</label><input id="uusername" name="username" required></div>
-          <div class="form-group"><label for="uemail">E-mail</label><input id="uemail" name="email" type="email" required></div>
-          <div class="form-group"><label for="ufullname">Volledige naam</label><input id="ufullname" name="full_name" required></div>
-          <div class="form-group">
-            <label for="urole">Rol</label>
-            <select id="urole" name="role" required>
-              <option value="field_engineer">Field Engineer</option>
-              <option value="admin">Administrator</option>
-            </select>
-          </div>
+        <input type="hidden" id="userFormUserId" name="user_id">
+        <div>
+          <label for="userFormUsername">Gebruikersnaam</label>
+          <input type="text" id="userFormUsername" name="username" required>
         </div>
-        <div class="form-buttons">
-          <button type="submit" class="btn btn-primary">Gebruiker opslaan</button>
-          <button type="button" id="cancelUserBtn" class="btn btn-secondary">Annuleren</button>
-          <span id="userMsg" class="error"></span>
+        <div>
+          <label for="userFormEmail">E-mail</label>
+          <input type="email" id="userFormEmail" name="email" required>
         </div>
+        <div>
+          <label for="userFormFullName">Volledige naam</label>
+          <input type="text" id="userFormFullName" name="full_name">
+        </div>
+        <div>
+          <label for="userFormRole">Rol</label>
+          <select id="userFormRole" name="role">
+            <option value="admin">Admin</option>
+            <option value="field_engineer">Field Engineer</option>
+          </select>
+        </div>
+        <div id="userMsg" style="color:#d00;margin-top:0.5em;"></div>
+        <button type="submit" class="btn btn-primary">Opslaan</button>
+        <button type="button" id="cancelUserBtn" class="btn">Annuleren</button>
       </form>
     </section>
 
@@ -148,6 +164,7 @@
     <section id="history-section" class="content-section" style="margin-top:2rem; display:none;">
       <div class="section-header">
         <h2>Historie</h2>
+        <button id="exportHistoryPdfBtn" class="btn btn-primary">Exporteer Historie als PDF</button>
       </div>
       <div id="historyTasks">
         <p>Laden...</p>
@@ -159,7 +176,6 @@
       <div class="section-header">
         <h2>Rapporten</h2>
       </div>
-      
       <div class="form-row">
         <div class="form-group">
           <label for="reportType">Rapport type</label>
@@ -177,15 +193,46 @@
           <button id="generateReportBtn" class="btn btn-primary">Genereer PDF Rapport</button>
         </div>
       </div>
-      
       <div id="reportResult" style="margin-top:2rem;"></div>
     </section>
-
-
   </main>
-
-  <!-- Belangrijk: session.js vóór admin.js, anders dropdowns leeg -->
   <script src="/assets/session.js" defer></script>
   <script src="/assets/admin.js" defer></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      if (document.body.style.display === 'none') document.body.style.display = '';
+    });
+
+    // v23: All menu buttons working, history loads via AJAX, forms toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.nav-btn[data-section]').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          document.querySelectorAll('.content-section').forEach(sec => sec.style.display = 'none');
+          var sectionId = btn.dataset.section + '-section';
+          var section = document.getElementById(sectionId);
+          if (section) section.style.display = '';
+          if (document.getElementById('editClientForm')) document.getElementById('editClientForm').style.display = 'none';
+          if (document.getElementById('userForm')) document.getElementById('userForm').style.display = 'none';
+          if (btn.dataset.section === 'history') {
+            document.getElementById('historyTasks').innerHTML = "<p>Laden...</p>";
+            fetch('/api/history/pdf.php')
+              .then(response => response.text())
+              .then(html => {
+                document.getElementById('historyTasks').innerHTML = html;
+              })
+              .catch(err => {
+                document.getElementById('historyTasks').innerHTML = "<p>Fout bij laden van historie.</p>";
+              });
+          }
+        });
+      });
+
+      var firstSection = document.querySelector('.nav-btn[data-section]');
+      if (firstSection) firstSection.click();
+    });
+  </script>
 </body>
+</html>
 </html>

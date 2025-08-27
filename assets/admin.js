@@ -1,9 +1,29 @@
-// admin.js v7 — Engineers beheren (bewerken, wachtwoord resetten, verwijderen) + bestaande taken/klant edits
+// admin.js v23 | Full user/client add/edit/delete, AJAX forms, button logic | est lines: ~245 | Author: franklos
+
 (function(){
   const $ = (s, ctx)=> (ctx||document).querySelector(s);
   const $$ = (s, ctx)=> Array.from((ctx||document).querySelectorAll(s));
   const state = { clients: [], users: [] };
-  console.log('[admin.js] v7 loaded');
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const navButtons = $$('.admin-nav .nav-btn');
+    const sections = $$('.content-section');
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        navButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        sections.forEach(sec => sec.style.display = 'none');
+        const sectionId = btn.getAttribute('data-section');
+        const section = $('#' + sectionId + '-section');
+        if (section) section.style.display = 'block';
+        if ($('#editClientForm')) $('#editClientForm').style.display = 'none';
+        if ($('#userForm')) $('#userForm').style.display = 'none';
+        if (sectionId === 'tasks') loadTasks();
+        if (sectionId === 'clients') loadClients();
+        if (sectionId === 'users') loadUsers();
+      });
+    });
+  });
 
   async function api(path, init){
     init = init || {};
@@ -14,653 +34,298 @@
     return body;
   }
 
-  function fillSelect(sel, items, getVal, getText, placeholder){
-    const s = (typeof sel==='string') ? $(sel) : sel;
-    if(!s) return null;
-    s.innerHTML = '';
-    if (placeholder) {
-      const opt = document.createElement('option');
-      opt.value = ''; opt.textContent = placeholder; s.appendChild(opt);
-    }
-    for(const it of items){
-      const opt = document.createElement('option');
-      opt.value = String(getVal(it));
-      opt.textContent = getText(it);
-      s.appendChild(opt);
-    }
-    return s;
-  }
-
-  function formatDate(dateStr) {
-    if (!dateStr) return '';
-    try {
-      const date = new Date(dateStr);
-      if (isNaN(date)) return dateStr;
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}-${month}-${year}`;
-    } catch (e) {
-      return dateStr;
-    }
-  }
-
-  function hideLegacyAddressFields(){
-    const candidates = ['#location','[name="location"]','[name="address_street"]','[name="address_number"]','[name="address_postcode"]','[name="address_city"]','[name="address_country"]'];
-    for(const sel of candidates){
-      const el = $(sel);
-      if(el){
-        const row = el.closest('.row') || el.closest('div') || el;
-        row.style.display = 'none';
-      }
-    }
-  }
-
-  /* ---------- Clients (existing) ---------- */
+  // --- Clients ---
   async function loadClients(){
     const rows = await api('/api/clients');
-    state.clients = rows || [];
-    
-    // Fill select dropdown
-    let sel = document.querySelector('select[name="client_id"], #client_id');
-    if (!sel) {
-      const candidates = $$('select');
-      sel = candidates.find(x => /client/i.test(x.name||'') || /client/i.test(x.id||'')) || null;
-    }
+    state.clients = rows;
+    let sel = $('#client_id');
     if (sel) {
-      sel = fillSelect(sel, state.clients, x=>x.id, x=>x.name || ('Klant #'+x.id), '— kies klant —');
-      if (sel){
-        sel.dataset.fpc = 'client-select';
-        if (!sel.id) sel.id = 'client_id';
+      sel.innerHTML = '<option value="">— kies klant —</option>';
+      for(const c of rows) {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name || 'Klant #' + c.id;
+        sel.appendChild(opt);
       }
     }
-    
-    // Fill clients table if it exists
-    const clientTable = document.getElementById('clientsTable');
-    if (clientTable) {
-      const tbody = clientTable.tBodies[0] || clientTable.createTBody();
+    const table = $('#clientsTable');
+    if(table){
+      const tbody = table.tBodies[0] || table.createTBody();
       tbody.innerHTML = '';
-      for (const client of state.clients) {
+      for(const c of rows){
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${client.id}</td>
-          <td>${client.name || ''}</td>
-          <td>${client.email || ''}</td>
-          <td>${client.phone || ''}</td>
-          <td>${client.address_city || ''} ${client.address_postcode || ''}</td>
-          <td>${formatDate(client.created_at) || ''}</td>
+          <td>${c.id}</td>
+          <td>${c.name||''}</td>
+          <td>${c.email||''}</td>
+          <td>${c.phone||''}</td>
+          <td>${c.address_city||''} ${c.address_postcode||''}</td>
+          <td>${c.created_at||''}</td>
           <td>
-            <button class="btn btn-sm" onclick="editClient(${client.id})">Bewerken</button>
+            <button type="button" class="btn btn-sm edit-client-btn" data-id="${c.id}">Bewerken</button>
+            <button type="button" class="btn btn-sm btn-danger delete-client-btn" data-id="${c.id}">Verwijderen</button>
           </td>
         `;
         tbody.appendChild(row);
       }
+      $$('.edit-client-btn', tbody).forEach(btn => {
+        btn.onclick = function() {
+          editClient(btn.dataset.id);
+        };
+      });
+      $$('.delete-client-btn', tbody).forEach(btn => {
+        btn.onclick = function() {
+          deleteClient(btn.dataset.id);
+        };
+      });
     }
-    
-    ensureClientEditButton();
+    if ($('#editClientForm')) $('#editClientForm').style.display = 'none';
   }
 
-  // Add global editClient function
-  window.editClient = function(clientId) {
-    openClientEditor(clientId);
+  // --- Add Client button ---
+  const addClientBtn = $('#addClientBtn');
+  const editClientForm = $('#editClientForm');
+  if(addClientBtn && editClientForm){
+    addClientBtn.addEventListener('click', function(){
+      editClientForm.style.display = 'block';
+      editClientForm.reset();
+      $('#clientFormTitle').textContent = 'Klant toevoegen';
+      $('#editClientId').value = '';
+      $('#editClientMsg').textContent = '';
+    });
+  }
+
+  // --- Edit Client ---
+  window.editClient = function(id){
+    const client = state.clients.find(c => c.id == id);
+    if (!client) return;
+    editClientForm.style.display = 'block';
+    editClientForm.reset();
+    $('#clientFormTitle').textContent = 'Klant bewerken';
+    $('#editClientId').value = client.id;
+    $('#editClientName').value = client.name || '';
+    $('#editClientEmail').value = client.email || '';
+    $('#editClientPhone').value = client.phone || '';
+    $('#editClientCity').value = client.address_city || '';
+    $('#editClientPostcode').value = client.address_postcode || '';
+    $('#editClientMsg').textContent = '';
   };
 
-  function clientSelect(){
-    return document.querySelector('select[data-fpc="client-select"]');
-  }
-
-  function ensureClientEditButton(){
-    const sel = clientSelect();
-    if (!sel) return;
-    if ($('#editClientBtn')) return;
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.id = 'editClientBtn';
-    btn.textContent = 'Bewerk klant';
-    btn.style.marginLeft = '.5rem';
-    btn.addEventListener('click', ()=>{
-      const raw = (sel.value||'').trim();
-      let id = parseInt(raw, 10);
-      if (!raw || Number.isNaN(id)) {
-        const name = sel.options[sel.selectedIndex]?.text?.trim();
-        const hit = state.clients.find(c => (c.name||'').trim() === (name||''));
-        id = hit ? parseInt(hit.id,10) : NaN;
-      }
-      if (Number.isNaN(id) || !id) { showClientPanelError('Kies eerst een geldige klant.'); return; }
-      openClientEditor(id);
-    });
-    sel.insertAdjacentElement('afterend', btn);
-  }
-
-  function ensureClientEditorPanel(){
-    let host = $('#clientEditor');
-    if (!host){
-      host = document.createElement('div');
-      host.id = 'clientEditor';
-      host.className = 'card';
-      host.style.marginTop = '1rem';
-      host.style.display = 'none';
-      host.innerHTML = `
-        <h3 style="margin-top:0;">Klant bewerken</h3>
-        <div id="clientEditInfo" class="muted" style="min-height:1.2em;"></div>
-        <form id="clientEditForm" style="margin-top:.5rem;">
-          <input type="hidden" name="id">
-          <div class="row"><label>Naam</label><input name="name" type="text" placeholder="Naam"></div>
-          <div class="row"><label>E-mail</label><input name="email" type="email" placeholder="E-mail"></div>
-          <div class="row"><label>Telefoon</label><input name="phone" type="text" placeholder="Telefoon"></div>
-          <div class="row"><label>Straat</label><input name="address_street" type="text" placeholder="Straat"></div>
-          <div class="row"><label>Nr</label><input name="address_number" type="text" placeholder="Nr"></div>
-          <div class="row"><label>Postcode</label><input name="address_postcode" type="text" placeholder="Postcode"></div>
-          <div class="row"><label>Plaats</label><input name="address_city" type="text" placeholder="Plaats"></div>
-          <div class="row"><label>Land</label><input name="address_country" type="text" placeholder="Land"></div>
-          <div class="row"><label>Adres (vrij)</label><input name="address" type="text" placeholder="Vrij adres (fallback)"></div>
-          <div class="row"><label>Notities</label><textarea name="notes" placeholder="Notities"></textarea></div>
-          <div class="row">
-            <button type="submit">Opslaan</button>
-            <button type="button" id="closeClientEditor" style="margin-left:.5rem;">Sluiten</button>
-            <span id="clientEditMsg" class="error" style="margin-left:.5rem;"></span>
-          </div>
-        </form>`;
-      const target = $('.container') || document.body;
-      target.appendChild(host);
-      $('#closeClientEditor').addEventListener('click', ()=>{ host.style.display='none'; });
-      bindClientEditForm();
+  // --- Delete Client ---
+  window.deleteClient = async function(id){
+    if (!confirm('Weet je zeker dat je deze klant wilt verwijderen?')) return;
+    try {
+      await api(`/api/clients/${id}`, { method:'DELETE' });
+      alert('Klant verwijderd.');
+      await loadClients();
+    } catch(err) {
+      alert('Fout bij verwijderen: ' + err.message);
     }
-    return host;
-  }
+  };
 
-  function showClientPanelError(msg){
-    ensureClientEditorPanel();
-    const panel = $('#clientEditor');
-    const info  = $('#clientEditInfo');
-    if (panel) panel.style.display = '';
-    if (info)  info.textContent = msg || '';
-  }
-
-  async function openClientEditor(clientId){
-    const panel = ensureClientEditorPanel();
-    const form  = $('#clientEditForm');
-    const msg   = $('#clientEditMsg');
-    const info  = $('#clientEditInfo');
-    if (panel) panel.style.display = '';
-    if (msg)   msg.textContent = '';
-    if (info)  info.textContent = 'Laden…';
+  // --- Save/Add Client ---
+  editClientForm?.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const id = $('#editClientId').value;
+    const payload = {
+      name: $('#editClientName').value,
+      email: $('#editClientEmail').value,
+      phone: $('#editClientPhone').value,
+      address_city: $('#editClientCity').value,
+      address_postcode: $('#editClientPostcode').value
+    };
     try{
-      const c = await api('/api/client?id='+encodeURIComponent(clientId));
-      if (info) info.textContent = '';
-      form.querySelector('[name="id"]').value = c.id;
-      for (const k of ['name','email','phone','address','address_street','address_number','address_postcode','address_city','address_country','notes']){
-        const el = form.querySelector('[name="'+k+'"]'); if (el) el.value = c[k] || '';
+      if(id) {
+        await api(`/api/clients/${id}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        $('#editClientMsg').textContent = 'Klant opgeslagen!';
+      } else {
+        await api('/api/clients', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        $('#editClientMsg').textContent = 'Klant toegevoegd!';
       }
-    }catch(e){
-      if (info) info.textContent = e.message || 'Laden mislukt';
+      editClientForm.style.display = 'none';
+      await loadClients();
+    }catch(err){
+      $('#editClientMsg').textContent = err.message;
     }
-  }
+  });
+  $('#cancelEditClientBtn')?.addEventListener('click', function(){
+    editClientForm.style.display = 'none';
+  });
 
-  function bindClientEditForm(){
-    const form = $('#clientEditForm');
-    if (!form) return;
-    form.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const msg = $('#clientEditMsg');
-      const fd = new FormData(form);
-      const payload = { id: (fd.get('id')||'').toString().trim() };
-      for (const k of ['name','email','phone','address','address_street','address_number','address_postcode','address_city','address_country','notes']){
-        const v = (fd.get(k)||'').toString();
-        if (v !== '') payload[k] = v;
-      }
-      try{
-        if (msg) msg.textContent = 'Opslaan...';
-        await api('/api/client', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-        if (msg) msg.textContent = 'Opgeslagen.';
-        await loadClients();
-      }catch(err){
-        if (msg) msg.textContent = err.message || 'API error';
-      }
-    });
-  }
-
-  /* ---------- Users: Engineers beheer ---------- */
-  function ensureEngineersPanel(){
-    let host = $('#engineersPanel');
-    if (!host){
-      host = document.createElement('div');
-      host.id = 'engineersPanel';
-      host.className = 'card';
-      host.style.marginTop = '1rem';
-      host.innerHTML = `
-        <h3 style="margin-top:0;">Engineers beheren</h3>
-        <div id="engMsg" class="error" style="min-height:1.2em;"></div>
-        <div class="table-wrap">
-          <table id="engTable">
-            <thead><tr>
-              <th>ID</th><th>Gebruiker</th><th>Naam</th><th>E-mail</th><th>Telefoon</th><th>Acties</th>
-            </tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      `;
-      const target = $('.container') || document.body;
-      target.appendChild(host);
-    }
-    return host;
-  }
-
-  async function loadEngineers(){
-    const msg = $('#engMsg'); if (msg) msg.textContent='';
-    const rows = await api('/api/users');
-    state.users = rows || [];
-    const engineers = state.users.filter(u => u.role === 'field_engineer');
-    const tbody = $('#engTable tbody'); if (!tbody) return;
-    tbody.innerHTML='';
-    for (const u of engineers){
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${u.id}</td>
-        <td>${u.username}</td>
-        <td>${u.full_name||''}</td>
-        <td>${u.email||''}</td>
-        <td>${u.phone||''}</td>
-        <td>
-          <button type="button" data-act="edit" data-id="${u.id}">Bewerk</button>
-          <button type="button" data-act="pw" data-id="${u.id}">Reset wachtwoord</button>
-          <button type="button" data-act="del" data-id="${u.id}">Verwijder</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    }
-  }
-
-  function bindEngineerActions(){
-    document.addEventListener('click', async (e)=>{
-      const btn = e.target;
-      if (!(btn instanceof HTMLElement)) return;
-      const act = btn.getAttribute('data-act');
-      const id  = parseInt(btn.getAttribute('data-id')||'0',10);
-      if (!act || !id) return;
-
-      const msg = $('#engMsg');
-      try{
-        if (act === 'edit'){
-          const user = state.users.find(x=>x.id===id);
-          if (!user) throw new Error('User niet gevonden');
-          const full_name = prompt('Naam', user.full_name||''); if (full_name===null) return;
-          const email = prompt('E-mail', user.email||''); if (email===null) return;
-          const phone = prompt('Telefoon (optioneel)', user.phone||''); if (phone===null) return;
-          await api('/api/users', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id, full_name, email, phone }) });
-          if (msg) msg.textContent = 'Gewijzigd.';
-          await loadEngineers();
-          await loadUsers(); // refresh assign dropdown
-        }
-        if (act === 'pw'){
-          const np = prompt('Nieuw wachtwoord voor engineer #' + id + ':'); if (np===null || np==='') return;
-          await api('/api/users/password', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id, new_password: np }) });
-          if (msg) msg.textContent = 'Wachtwoord gereset.';
-        }
-        if (act === 'del'){
-          if (!confirm('Weet je zeker dat je engineer #' + id + ' wilt verwijderen? Alle gekoppelde taken moeten eerst worden herverdeeld.')) return;
-          const r = await fetch('/api/users?id='+id, { method:'DELETE', credentials:'include' });
-          let body=null; try{ body=await r.json(); }catch(_){}
-          if(!r.ok){ throw new Error((body && (body.error||body.message)) || r.statusText); }
-          if (msg) msg.textContent = 'Engineer verwijderd.';
-          await loadEngineers();
-          await loadUsers(); // refresh assign dropdown
-        }
-      }catch(err){
-        if (msg) msg.textContent = err.message || 'Actie mislukt';
-      }
-    });
-  }
-
-  /* ---------- Engineers (for task assign dropdown) ---------- */
-  async function loadEngineers(){
-    const rows = await api('/api/engineers');
-    state.engineers = rows || [];
-    const sel = document.querySelector('select[name="assigned_user_id"], #assigned_user_id');
-    if (sel) fillSelect(sel, state.engineers, x=>x.id, x=>x.name || `Engineer #${x.id}`, '— kies engineer —');
-  }
-
-  /* ---------- Users (existing for task assign) ---------- */
+  // --- Users ---
   async function loadUsers(){
-    const rows = await api('/api/users');
-    state.users = rows || [];
-    const eng = state.users.filter(u => u.role === 'field_engineer');
-    const sel = document.querySelector('select[name="assigned_to"], #assigned_to');
-    if (sel) fillSelect(sel, eng, x=>x.id, x=>x.full_name || x.username, '— kies engineer —');
+    const users = await api('/api/users');
+    state.users = users;
+    populateEngineerDropdown(users);
+    const table = $('#usersTable');
+    if(table){
+      const tbody = table.tBodies[0] || table.createTBody();
+      tbody.innerHTML = '';
+      for(const u of users){
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${u.id}</td><td>${u.username||''}</td><td>${u.email||''}</td>
+          <td>${u.full_name||u.first_name||''} ${u.last_name||''}</td><td>${u.role||''}</td>
+          <td>${u.activated == 1 ? 'Ja' : 'Nee'}</td>
+          <td>
+            <button class="btn btn-sm edit-user-btn" data-id="${u.id}">Bewerken</button>
+            <button class="btn btn-sm btn-danger delete-user-btn" data-id="${u.id}">Verwijderen</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      }
+      $$('.edit-user-btn', tbody).forEach(btn => {
+        btn.onclick = function() {
+          editUser(btn.dataset.id);
+        };
+      });
+      $$('.delete-user-btn', tbody).forEach(btn => {
+        btn.onclick = function() {
+          deleteUser(btn.dataset.id);
+        };
+      });
+    }
   }
 
-  /* ---------- Tasks (existing) ---------- */
-  function bindTaskForm(){
-    const form = $('#taskForm') || $('form#taskForm') || document.forms[0];
-    const msg  = $('#taskMsg') || $('.error');
-    if(!form) return;
-    form.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const fd = new FormData(form);
-      const payload = {
-        title: (fd.get('title')||'').toString().trim(),
-        description: (fd.get('description')||'').toString().trim(),
-        client_id: (fd.get('client_id')||'').toString().trim(),
-        assigned_user_id: (fd.get('assigned_user_id')||'').toString().trim(),
-        priority: (fd.get('priority')||'medium').toString().trim(),
-        scheduled_date: (fd.get('scheduled_date')||'').toString().trim()
-      };
-      if(!payload.title){ if(msg) msg.textContent = 'Titel is verplicht.'; return; }
-      try{
-        if(msg) msg.textContent = 'Opslaan...';
-        await api('/api/tasks', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(payload)
-        });
-        if(msg) msg.textContent = 'Taak toegevoegd.';
-        form.reset();
-        try { await loadTasks(); } catch(e){}
-      }catch(err){
-        if(msg) msg.textContent = err.message || 'API error';
+  // --- Add User Button ---
+  const addUserBtn = $('#addUserBtn');
+  const userForm = $('#userForm');
+  if(addUserBtn && userForm){
+    addUserBtn.addEventListener('click', function(){
+      userForm.style.display = 'block';
+      userForm.reset();
+      $('#userFormTitle').textContent = 'Nieuwe gebruiker';
+      $('#userFormUserId').value = '';
+      $('#userMsg').textContent = '';
+    });
+  }
+
+  // --- Edit User ---
+  window.editUser = function(id){
+    const user = state.users.find(u => u.id == id);
+    if (!user) return;
+    userForm.style.display = 'block';
+    userForm.reset();
+    $('#userFormTitle').textContent = 'Gebruiker bewerken';
+    $('#userFormUserId').value = user.id;
+    $('#userFormUsername').value = user.username || '';
+    $('#userFormEmail').value = user.email || '';
+    $('#userFormFullName').value = user.full_name || '';
+    $('#userFormRole').value = user.role || '';
+    $('#userMsg').textContent = '';
+  };
+
+  // --- Delete User ---
+  window.deleteUser = async function(id){
+    if (!confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) return;
+    try{
+      await api(`/api/users/${id}`, { method:'DELETE' });
+      alert('Gebruiker verwijderd.');
+      await loadUsers();
+    }catch(err){
+      alert('Fout bij verwijderen: ' + err.message);
+    }
+  };
+
+  // --- Save/Add User ---
+  userForm?.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const userId = $('#userFormUserId').value;
+    const payload = {
+      username: $('#userFormUsername').value,
+      email: $('#userFormEmail').value,
+      full_name: $('#userFormFullName').value,
+      role: $('#userFormRole').value
+    };
+    try{
+      if (userId) {
+        await api(`/api/users/${userId}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        $('#userMsg').textContent = 'Gebruiker opgeslagen!';
+      } else {
+        await api('/api/users', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        $('#userMsg').textContent = 'Gebruiker toegevoegd!';
       }
+      userForm.style.display = 'none';
+      await loadUsers();
+    }catch(err){
+      $('#userMsg').textContent = err.message;
+    }
+  });
+  $('#cancelUserBtn')?.addEventListener('click', function(){
+    userForm.style.display = 'none';
+  });
+
+  function populateEngineerDropdown(users){
+    const sel = $('#assigned_user_id');
+    if(!sel) return;
+    sel.innerHTML = '<option value="">— kies engineer —</option>';
+    users.filter(u =>
+      u.role === 'field_engineer' && parseInt(u.activated) === 1
+    ).forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.id;
+      opt.textContent = u.full_name || ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || u.username;
+      sel.appendChild(opt);
     });
   }
 
   async function loadTasks(){
-    const table = $('#tasksTable'); if(!table) return;
     const rows = await api('/api/tasks');
-    const tbody = table.tBodies[0] || table.createTBody();
-    tbody.innerHTML='';
-    for(const t of rows){
-      const addr = (t.full_address||t.location||'');
-      const map = t.maps_url ? ` <a href="${t.maps_url}" target="_blank" rel="noopener">Kaart</a>` : '';
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${t.id}</td>
-        <td>${t.title||''}</td>
-        <td>${t.client_name||''}</td>
-        <td>${t.assigned_to_name || t.assigned_user_id_name || ''}</td>
-        <td>${t.priority||''}</td>
-        <td>${formatDate(t.scheduled_date)||''}</td>
-        <td>${addr}${map}</td>
-      `;
-      tbody.appendChild(tr);
-    }
-  }
-
-  /* ---------- Init ---------- */
-  document.addEventListener('DOMContentLoaded', async function(){
-    hideLegacyAddressFields();
-    ensureEngineersPanel();
-    bindEngineerActions();
-    initializeNavigation();
-    bindUserManagement();
-    try{
-      await Promise.all([loadClients(), loadUsers(), loadEngineers()]);
-    }catch(e){ console.error(e); }
-    ensureClientEditButton();
-    ensureClientEditorPanel();
-    bindClientEditForm();
-    bindTaskForm();
-    try{ await loadTasks(); }catch(e){}
-  });
-  // Navigation functionality
-  function initializeNavigation() {
-    const navButtons = document.querySelectorAll('.nav-btn');
-    navButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const section = btn.getAttribute('data-section');
-        showSection(section);
-        
-        // Update active nav button
-        navButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
-  }
-  
-  function showSection(section) {
-    // Hide all sections first
-    const allSections = document.querySelectorAll('.content-section');
-    allSections.forEach(s => s.style.display = 'none');
-    
-    // Show the selected section
-    if (section === 'tasks') {
-      // Show both task creation form and task list table
-      const tasksSection = document.getElementById('tasks-section');
-      if (tasksSection) tasksSection.style.display = 'block';
-      
-      // Also show the tasks table section (not the clients table)
-      const tasksTableSection = document.querySelector('section:has(#tasksTable)');
-      if (tasksTableSection && tasksTableSection.id !== 'clients-section') {
-        tasksTableSection.style.display = 'block';
-      }
-    } else if (section === 'clients') {
-      const clientsSection = document.getElementById('clients-section');
-      if (clientsSection) clientsSection.style.display = 'block';
-    } else if (section === 'users') {
-      const usersSection = document.getElementById('users-section');
-      if (usersSection) usersSection.style.display = 'block';
-    } else if (section === 'history') {
-      const historySection = document.getElementById('history-section');
-      if (historySection) historySection.style.display = 'block';
-    } else if (section === 'reports') {
-      const reportsSection = document.getElementById('reports-section');
-      if (reportsSection) reportsSection.style.display = 'block';
-    }
-  }
-
-  // User management
-  async function loadUsers() {
-    try {
-      const users = await api('/api/users');
-      const tbody = document.querySelector('#usersTable tbody');
-      if (!tbody) return;
-      
+    const table = $('#tasksTable');
+    if(table){
+      const tbody = table.tBodies[0] || table.createTBody();
       tbody.innerHTML = '';
-      users.forEach(user => {
+      for(const t of rows){
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${user.id}</td>
-          <td>${user.username || ''}</td>
-          <td>${user.email || ''}</td>
-          <td>${user.full_name || ''}</td>
-          <td>${user.role || ''}</td>
-          <td>${user.activated ? 'Ja' : 'Nee'}</td>
-          <td>
-            <button class="btn btn-sm" onclick="editUser(${user.id})">Bewerken</button>
-            <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">Verwijderen</button>
-          </td>
+          <td>${t.id}</td><td>${t.title||''}</td><td>${t.client_name||''}</td>
+          <td>${t.assigned_to_name||''}</td>
+          <td>${t.priority||''}</td><td>${t.scheduled_date||''}</td>
+          <td>${t.full_address||''}</td>
         `;
         tbody.appendChild(row);
-      });
-    } catch (error) {
-      console.error('Failed to load users:', error);
+      }
     }
   }
 
-  function bindUserManagement() {
-    const addUserBtn = document.getElementById('addUserBtn');
-    const userForm = document.getElementById('userForm');
-    const cancelUserBtn = document.getElementById('cancelUserBtn');
-    
-    if (addUserBtn) {
-      addUserBtn.addEventListener('click', () => {
-        document.getElementById('userForm').style.display = 'block';
-        document.getElementById('userFormTitle').textContent = 'Nieuwe gebruiker';
-        document.getElementById('userForm').reset();
-      });
-    }
-    
-    if (cancelUserBtn) {
-      cancelUserBtn.addEventListener('click', () => {
-        document.getElementById('userForm').style.display = 'none';
-      });
-    }
-    
-    if (userForm) {
-      userForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(userForm);
-        const userData = {
-          username: formData.get('username'),
-          email: formData.get('email'),
-          full_name: formData.get('full_name'),
-          role: formData.get('role')
-        };
-        
-        try {
-          await api('/api/users', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData)
-          });
-          document.getElementById('userMsg').textContent = 'Gebruiker toegevoegd!';
-          userForm.style.display = 'none';
-          await loadUsers();
-        } catch (error) {
-          document.getElementById('userMsg').textContent = error.message;
-        }
-      });
-    }
-  }
-
-  // Reports functionality
-  function bindReports() {
-    const generateBtn = document.getElementById('generateReportBtn');
-    if (generateBtn) {
-      generateBtn.addEventListener('click', async () => {
-        const type = document.getElementById('reportType').value;
-        const dateFrom = document.getElementById('reportDate').value;
-        const resultDiv = document.getElementById('reportResult');
-        
-        try {
-          resultDiv.innerHTML = 'Rapport genereren...';
-          
-          const response = await api('/api/reports/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: type,
-              date_from: dateFrom
-            })
-          });
-          
-          if (response.ok) {
-            resultDiv.innerHTML = `
-              <div class="success-message">
-                <p>Rapport succesvol gegenereerd!</p>
-                <a href="${response.path}" target="_blank" class="btn btn-primary">Download PDF</a>
-              </div>
-            `;
-          }
-        } catch (error) {
-          resultDiv.innerHTML = `<div class="error-message">Fout bij genereren rapport: ${error.message}</div>`;
-        }
-      });
-    }
-  }
-
-  // Global functions for user management
-  window.editUser = async function(userId) {
-    try {
-      const user = state.users.find(u => u.id === parseInt(userId));
-      if (!user) {
-        document.getElementById('userMsg').textContent = 'Gebruiker niet gevonden';
-        return;
+  const generateReportBtn = $('#generateReportBtn');
+  if(generateReportBtn){
+    generateReportBtn.addEventListener('click', async function(){
+      const type = $('#reportType').value;
+      const dateFrom = $('#reportDate').value;
+      const resultDiv = $('#reportResult');
+      try{
+        const response = await api('/api/reports/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({type:type, date_from:dateFrom}) });
+        resultDiv.innerHTML = `<div class="success-message">Rapport succesvol gegenereerd! <a href="${response.path}" target="_blank">Download PDF</a></div>`;
+      }catch(err){
+        resultDiv.innerHTML = `<div class="error-message">Fout bij genereren rapport: ${err.message}</div>`;
       }
-      
-      const newEmail = prompt('E-mail adres:', user.email || '');
-      if (newEmail === null) return; // cancelled
-      
-      const newFullName = prompt('Volledige naam:', user.full_name || '');
-      if (newFullName === null) return; // cancelled
-      
-      const response = await fetch('/api/users', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: parseInt(userId),
-          email: newEmail,
-          full_name: newFullName
-        }),
-        credentials: 'include'
-      });
-      
-      const result = await response.json();
-      
-      if (response.ok) {
-        document.getElementById('userMsg').textContent = 'Gebruiker bijgewerkt!';
-        await loadUsers(); // Reload the users list
-      } else {
-        document.getElementById('userMsg').textContent = result.error || 'Fout bij bijwerken';
-      }
-    } catch (error) {
-      document.getElementById('userMsg').textContent = 'Fout bij bijwerken gebruiker: ' + error.message;
-    }
-  };
-
-  window.deleteUser = async function(userId) {
-    if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
-      try {
-        const response = await fetch('/api/users?id=' + userId, {
-          method: 'DELETE',
-          credentials: 'include'
-        });
-        
-        const result = await response.json();
-        
-        if (response.ok) {
-          document.getElementById('userMsg').textContent = 'Gebruiker verwijderd!';
-          await loadUsers(); // Reload the users list
-        } else {
-          document.getElementById('userMsg').textContent = result.error || 'Fout bij verwijderen';
-        }
-      } catch (error) {
-        document.getElementById('userMsg').textContent = 'Er ging iets mis: ' + error.message;
-      }
-    }
-  };
-
-  /* ---------- Navigation ---------- */
-  function initializeNavigation() {
-    const navButtons = document.querySelectorAll('.admin-nav .nav-btn');
-    const sections = {
-      'tasks': document.getElementById('tasks-section'),
-      'clients': document.getElementById('clients-section'), 
-      'users': document.getElementById('users-section'),
-      'reports': document.getElementById('reports-section')
-    };
-
-    navButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const section = btn.getAttribute('data-section');
-        
-        // Hide all sections
-        Object.values(sections).forEach(sec => {
-          if (sec) sec.style.display = 'none';
-        });
-        
-        // Show selected section
-        if (sections[section]) {
-          sections[section].style.display = 'block';
-        }
-        
-        // Update active nav button
-        navButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
     });
   }
 
-  // Global user management functions
-  window.editUser = function(userId) {
-    console.log('Edit user:', userId);
-    // Add edit functionality here
-  };
-  
-  window.deleteUser = function(userId) {
-    if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
-      api('/api/users/' + userId, { method: 'DELETE' })
-        .then(() => loadUsers())
-        .catch(err => alert(err.message));
-    }
-  };
+  const exportHistoryPdfBtn = $('#exportHistoryPdfBtn');
+  if(exportHistoryPdfBtn){
+    exportHistoryPdfBtn.addEventListener('click', async function(){
+      exportHistoryPdfBtn.disabled = true;
+      exportHistoryPdfBtn.textContent = 'PDF maken...';
+      try{
+        const result = await api('/api/history/pdf', { method:'POST' });
+        if(result && result.path){
+          window.open(result.path, '_blank');
+        }
+      }catch(err){
+        alert('PDF export mislukt: ' + (err.message || err));
+      }finally{
+        exportHistoryPdfBtn.disabled = false;
+        exportHistoryPdfBtn.textContent = 'Exporteer Historie als PDF';
+      }
+    });
+  }
 
+  (async function(){
+    $$('.content-section').forEach(sec => sec.style.display = 'none');
+    const defaultSection = $('#tasks-section');
+    if (defaultSection) defaultSection.style.display = 'block';
+    await Promise.all([loadClients(), loadUsers(), loadTasks()]);
+  })();
 })();

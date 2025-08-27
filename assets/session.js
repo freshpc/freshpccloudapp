@@ -1,4 +1,4 @@
-// Session helper for admin.html and field-engineer.html
+// session.js v5 | Robust session/auth handler for admin and engineer pages | line est: ~54 | Author: franklos
 (function () {
   // Always include cookies on same-origin fetch
   const origFetch = window.fetch;
@@ -30,13 +30,14 @@
     const path = location.pathname;
     const needAdmin = path.includes('admin');
     const needAuth  = path.includes('admin') || path.includes('field-engineer');
-    if(!needAuth) return;
+    if(!needAuth) return document.body.style.display = '';
     const s = await status();
     if(s.authenticated){
       if(needAdmin && s.user?.role!=='admin'){ location.assign('/engineer'); }
+      document.body.style.display = '';
       return;
     }
-    if(!attachLoginIfPresent()) location.assign('/'); // go to landing login
+    if(!attachLoginIfPresent()) location.assign('/');
   }
 
   document.addEventListener('DOMContentLoaded', ensureAuth);

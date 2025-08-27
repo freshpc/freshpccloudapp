@@ -1,3 +1,4 @@
+// assets/login.js v5 | est lines: ~58
 (function(){
   const $ = (s, ctx)=> (ctx||document).querySelector(s);
 
@@ -54,37 +55,28 @@
         return;
       }
       
-      // Hide any previous errors
-      if (errorDiv) {
-        errorDiv.style.display = 'none';
-      }
+      if (errorDiv) errorDiv.style.display = 'none';
       
       try {
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch('/api/auth/login.php', { // <-- FIXED HERE
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: email,
-            password: password
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: email, password })
         });
         
         const data = await response.json();
         
-        if (response.ok && data.ok) {
-          // Successful login - redirect based on role
-          const role = data.user?.role;
+        if (response.ok && data.success) {
+          // Optionally use role from data if provided, else redirect to admin
+          const role = data.role || data.user?.role;
           if (role === 'admin') {
-            window.location.href = '/admin';
-          } else if (role === 'field_engineer') {
-            window.location.href = '/engineer';
+            window.location.href = '/admin.php';
+          } else if (role === 'field_engineer' || role === 'engineer') {
+            window.location.href = '/engineer.php';
           } else {
             window.location.href = '/';
           }
         } else {
-          // Login failed
           if (errorDiv) {
             errorDiv.textContent = data.error || 'Ongeldige inloggegevens.';
             errorDiv.style.display = 'block';
