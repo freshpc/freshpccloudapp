@@ -1,21 +1,3 @@
-# Local/private config
-config.php
-config.inc.php
-
-# Logs and cache
-*.log
-*.cache
-*.tmp
-
-# OS / IDE files
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-
-# Dependency/vendor directories
-vendor/
-node_modules/
 # --- Local/private config ---
 config.php
 config.inc.php
@@ -49,5 +31,4 @@ desktop.ini
 .vscode/
 .idea/
 *.code-workspace
-.vs
-
+.vs/
