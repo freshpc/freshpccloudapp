@@ -1,0 +1,34 @@
+# --- Local/private config ---
+config.php
+config.inc.php
+.env
+
+# --- Logs / cache / temp ---
+*.log
+*.cache
+*.tmp
+*.swp
+*.bak
+
+# --- Dependency / build directories ---
+vendor/
+node_modules/
+dist/
+.cache/
+coverage/
+
+# --- Uploads & generated files ---
+uploads/
+storage/
+*.pdf
+
+# --- OS / Editor junk ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- IDE / Editor settings ---
+.vscode/
+.idea/
+*.code-workspace
+.vs/

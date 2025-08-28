@@ -1,0 +1,19 @@
+# .htaccess v3 | Supports /api/foo, /api/foo/123, /api/foo.php | est lines: 15
+RewriteEngine On
+
+# Route /api/users and /api/users/123 to users.php
+RewriteRule ^users/?$ users.php [L,QSA]
+RewriteRule ^users/([0-9]+)$ users.php [L,QSA]
+
+# Route /api/clients and /api/clients/123 to clients.php
+RewriteRule ^clients/?$ clients.php [L,QSA]
+RewriteRule ^clients/([0-9]+)$ clients.php [L,QSA]
+
+# Route /api/tasks and /api/tasks/123 to tasks.php
+RewriteRule ^tasks/?$ tasks.php [L,QSA]
+RewriteRule ^tasks/([0-9]+)$ tasks.php [L,QSA]
+
+# Fallback for /api/foo to /api/foo.php if not matching above
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([a-zA-Z0-9_-]+)$ $1.php [L,QSA]

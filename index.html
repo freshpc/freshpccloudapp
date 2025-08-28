@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en" id="html-lang">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FreshPC Cloud – Smart Hands Services for International Customers in Netherlands</title>
+  <meta name="description" content="Professional smart hands services in the Netherlands for international customers. Remote technical support, POS systems, server maintenance, computer hardware, and IT equipment servicing.">
+  <meta name="keywords" content="smart hands, remote hands, Netherlands, POS systems, computer hardware, server maintenance, IT support, technical services, equipment repair">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="FreshPC Cloud">
+  <meta property="og:title" content="FreshPC Cloud - Smart Hands & IT Services Netherlands">
+  <meta property="og:description" content="Professional smart hands services for international customers - POS systems, computer hardware, and IT equipment support in the Netherlands">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://freshpccloud.nl">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FreshPC Cloud - Smart Hands & IT Services Netherlands">
+  <meta name="twitter:description" content="Professional smart hands services for international customers with equipment in the Netherlands">
+  <link rel="icon" href="/images/favicon.ico">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; }
+    
+    /* Auto language detection - no visible selector needed */
+    
+    /* Navigation */
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1rem 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 2rem;
+    }
+    
+    .nav-logo h1 {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 0.2rem;
+    }
+    
+    .nav-logo span {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    
+    .nav-menu {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .nav-link {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+    
+    .nav-link:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      color: white;
+      padding: 4rem 0;
+      text-align: center;
+    }
+    
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+    
+    .hero p {
+      font-size: 1.3rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+    
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 0.8rem 2rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      border: none;
+      cursor: pointer;
+      display: inline-block;
+    }
+    
+    .btn-primary {
+      background: #28a745;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #218838;
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: #667eea;
+    }
+    
+    .btn-secondary:hover {
+      background: #f8f9fa;
+      transform: translateY(-2px);
+    }
+    
+    /* Services Section */
+    .services {
+      padding: 4rem 0;
+      background: #f8f9fa;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    
+    .section-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 3rem;
+      color: #333;
+    }
+    
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    
+    .service-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.3s;
+    }
+    
+    .service-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .service-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .service-card h3 {
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    
+    .service-card p {
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    /* Features Section */
+    .features {
+      padding: 4rem 0;
+      background: white;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+    
+    .feature {
+      text-align: center;
+      padding: 1rem;
+    }
+    
+    .feature-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      color: white;
+      font-size: 2rem;
+    }
+    
+    /* Footer */
+    .footer {
+      background: #343a40;
+      color: white;
+      padding: 2rem 0;
+      text-align: center;
+    }
+    
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .footer-section h4 {
+      margin-bottom: 1rem;
+      color: #667eea;
+    }
+    
+    .footer-section p, .footer-section a {
+      color: #adb5bd;
+      text-decoration: none;
+      line-height: 1.8;
+    }
+    
+    .footer-section a:hover {
+      color: white;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2rem; }
+      .hero p { font-size: 1.1rem; }
+      .nav-container { flex-direction: column; gap: 1rem; }
+      .lang-selector { position: static; margin: 1rem; }
+    }
+    
+    /* Hidden content for different languages */
+    .lang-content { display: none; }
+    .lang-content.active { display: block; }
+  </style>
+</head>
+<body>
+  <!-- Auto language detection - no UI needed -->
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <h1>FreshPC Cloud</h1>
+        <span class="lang-content active" data-lang="en">Professional Field Engineering</span>
+        <span class="lang-content" data-lang="nl">Professionele Field Engineering</span>
+        <span class="lang-content" data-lang="de">Professionelle Feldtechnik</span>
+        <span class="lang-content" data-lang="fr">Ingénierie de Terrain Professionnelle</span>
+        <span class="lang-content" data-lang="it">Ingegneria Professionale sul Campo</span>
+        <span class="lang-content" data-lang="pl">Profesjonalna Inżynieria Terenowa</span>
+        <span class="lang-content" data-lang="uk">Професійна Польова Інженерія</span>
+        <span class="lang-content" data-lang="es">Ingeniería de Campo Profesional</span>
+        <span class="lang-content" data-lang="ro">Inginerie Profesională de Teren</span>
+      </div>
+      <div class="nav-menu">
+        <a href="/login?role=engineer" class="nav-link">
+          <span class="lang-content active" data-lang="en">Engineer Login</span>
+          <span class="lang-content" data-lang="nl">Engineer Inlog</span>
+          <span class="lang-content" data-lang="de">Techniker Anmeldung</span>
+          <span class="lang-content" data-lang="fr">Connexion Technicien</span>
+          <span class="lang-content" data-lang="it">Login Tecnico</span>
+          <span class="lang-content" data-lang="pl">Logowanie Technika</span>
+          <span class="lang-content" data-lang="uk">Вхід Техніка</span>
+          <span class="lang-content" data-lang="es">Login Técnico</span>
+          <span class="lang-content" data-lang="ro">Login Tehnician</span>
+        </a>
+        <a href="/login?role=admin" class="nav-link">
+          <span class="lang-content active" data-lang="en">Admin</span>
+          <span class="lang-content" data-lang="nl">Admin</span>
+          <span class="lang-content" data-lang="de">Admin</span>
+          <span class="lang-content" data-lang="fr">Admin</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>
+        <span class="lang-content active" data-lang="en">Smart Hands & IT Services Netherlands</span>
+        <span class="lang-content" data-lang="nl">Smart Hands & IT Services Nederland</span>
+        <span class="lang-content" data-lang="de">Smart Hands & IT Services Niederlande</span>
+        <span class="lang-content" data-lang="fr">Services Smart Hands & IT Pays-Bas</span>
+        <span class="lang-content" data-lang="it">Servizi Smart Hands & IT Paesi Bassi</span>
+        <span class="lang-content" data-lang="pl">Usługi Smart Hands & IT Holandia</span>
+        <span class="lang-content" data-lang="uk">Smart Hands & IT Послуги Нідерланди</span>
+        <span class="lang-content" data-lang="es">Servicios Smart Hands & IT Países Bajos</span>
+        <span class="lang-content" data-lang="ro">Servicii Smart Hands & IT Olanda</span>
+      </h1>
+      <p>
+        <span class="lang-content active" data-lang="en">Professional smart hands services for international customers with POS systems, computer hardware, servers, and IT equipment in the Netherlands.</span>
+        <span class="lang-content" data-lang="nl">Professionele smart hands services voor internationale klanten met POS-systemen, computerhardware, servers en IT-apparatuur in Nederland.</span>
+        <span class="lang-content" data-lang="de">Professionelle Smart-Hands-Services für internationale Kunden mit POS-Systemen, Computer-Hardware, Servern und IT-Geräten in den Niederlanden.</span>
+        <span class="lang-content" data-lang="fr">Services smart hands professionnels pour clients internationaux avec systèmes POS, matériel informatique, serveurs et équipements IT aux Pays-Bas.</span>
+        <span class="lang-content" data-lang="it">Servizi smart hands professionali per clienti internazionali con sistemi POS, hardware informatico, server e apparecchiature IT nei Paesi Bassi.</span>
+        <span class="lang-content" data-lang="pl">Profesjonalne usługi smart hands dla międzynarodowych klientów z systemami POS, sprzętem komputerowym, serwerami i urządzeniami IT w Holandii.</span>
+        <span class="lang-content" data-lang="uk">Професійні smart hands послуги для міжнародних клієнтів з POS-системами, комп'ютерним обладнанням, серверами та IT-обладнанням у Нідерландах.</span>
+        <span class="lang-content" data-lang="es">Servicios smart hands profesionales para clientes internacionales con sistemas POS, hardware informático, servidores y equipos IT en los Países Bajos.</span>
+        <span class="lang-content" data-lang="ro">Servicii smart hands profesionale pentru clienți internaționali cu sisteme POS, hardware de calculator, servere și echipamente IT în Olanda.</span>
+      </p>
+      <div class="hero-buttons">
+        <a href="mailto:admin@freshpccloud.nl" class="btn btn-primary">
+          <span class="lang-content active" data-lang="en">Request Quote</span>
+          <span class="lang-content" data-lang="nl">Offerte Aanvragen</span>
+          <span class="lang-content" data-lang="de">Angebot Anfordern</span>
+          <span class="lang-content" data-lang="fr">Demander un Devis</span>
+        </a>
+        <a href="#services" class="btn btn-secondary">
+          <span class="lang-content active" data-lang="en">Our Services</span>
+          <span class="lang-content" data-lang="nl">Onze Diensten</span>
+          <span class="lang-content" data-lang="de">Unsere Dienstleistungen</span>
+          <span class="lang-content" data-lang="fr">Nos Services</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="services">
+    <div class="container">
+      <h2 class="section-title">
+        <span class="lang-content active" data-lang="en">Our Services</span>
+        <span class="lang-content" data-lang="nl">Onze Diensten</span>
+        <span class="lang-content" data-lang="de">Unsere Dienstleistungen</span>
+        <span class="lang-content" data-lang="fr">Nos Services</span>
+      </h2>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon">🔧</div>
+          <h3>
+            <span class="lang-content active" data-lang="en">POS & Retail Systems</span>
+            <span class="lang-content" data-lang="nl">POS & Retail Systemen</span>
+            <span class="lang-content" data-lang="de">POS & Einzelhandelssysteme</span>
+            <span class="lang-content" data-lang="fr">Systèmes POS & Commerce</span>
+            <span class="lang-content" data-lang="it">Sistemi POS & Retail</span>
+            <span class="lang-content" data-lang="pl">Systemy POS & Handel</span>
+            <span class="lang-content" data-lang="uk">POS & Роздрібні Системи</span>
+            <span class="lang-content" data-lang="es">Sistemas POS & Retail</span>
+            <span class="lang-content" data-lang="ro">Sisteme POS & Retail</span>
+          </h3>
+          <p>
+            <span class="lang-content active" data-lang="en">Professional installation, configuration, and maintenance of POS terminals, payment systems, and retail technology equipment in the Netherlands.</span>
+            <span class="lang-content" data-lang="nl">Professionele installatie, configuratie en onderhoud van POS-terminals, betaalsystemen en retail technologie apparatuur in Nederland.</span>
+            <span class="lang-content" data-lang="de">Professionelle Installation, Konfiguration und Wartung von POS-Terminals, Zahlungssystemen und Einzelhandelstechnologie in den Niederlanden.</span>
+            <span class="lang-content" data-lang="fr">Installation, configuration et maintenance professionnelles de terminaux POS, systèmes de paiement et équipements de technologie retail aux Pays-Bas.</span>
+            <span class="lang-content" data-lang="it">Installazione, configurazione e manutenzione professionale di terminali POS, sistemi di pagamento e apparecchiature tecnologiche retail nei Paesi Bassi.</span>
+            <span class="lang-content" data-lang="pl">Profesjonalna instalacja, konfiguracja i konserwacja terminali POS, systemów płatności i sprzętu technologii handlowej w Holandii.</span>
+            <span class="lang-content" data-lang="uk">Професійна установка, налаштування та обслуговування POS-терміналів, платіжних систем та обладнання роздрібних технологій у Нідерландах.</span>
+            <span class="lang-content" data-lang="es">Instalación, configuración y mantenimiento profesional de terminales POS, sistemas de pago y equipos de tecnología retail en los Países Bajos.</span>
+            <span class="lang-content" data-lang="ro">Instalare, configurare și întreținere profesională a terminalelor POS, sistemelor de plată și echipamentelor de tehnologie retail în Olanda.</span>
+          </p>
+        </div>
+        
+        <div class="service-card">
+          <div class="service-icon">💻</div>
+          <h3>
+            <span class="lang-content active" data-lang="en">Computer Hardware & IT Equipment</span>
+            <span class="lang-content" data-lang="nl">Computerhardware & IT Apparatuur</span>
+            <span class="lang-content" data-lang="de">Computer-Hardware & IT-Geräte</span>
+            <span class="lang-content" data-lang="fr">Matériel Informatique & Équipements IT</span>
+            <span class="lang-content" data-lang="it">Hardware Informatico & Apparecchiature IT</span>
+            <span class="lang-content" data-lang="pl">Sprzęt Komputerowy & Urządzenia IT</span>
+            <span class="lang-content" data-lang="uk">Комп'ютерне Обладнання & IT Устаткування</span>
+            <span class="lang-content" data-lang="es">Hardware Informático & Equipos IT</span>
+            <span class="lang-content" data-lang="ro">Hardware de Calculator & Echipamente IT</span>
+          </h3>
+          <p>
+            <span class="lang-content active" data-lang="en">Fast computer hardware replacement, server maintenance, network equipment service, and IT infrastructure support for your Netherlands-based equipment.</span>
+            <span class="lang-content" data-lang="nl">Snelle computerhardware vervanging, server onderhoud, netwerkapparatuur service en IT infrastructuur ondersteuning voor uw in Nederland gebaseerde apparatuur.</span>
+            <span class="lang-content" data-lang="de">Schneller Computer-Hardware-Ersatz, Serverwartung, Netzwerkgeräte-Service und IT-Infrastruktur-Support für Ihre in den Niederlanden ansässigen Geräte.</span>
+            <span class="lang-content" data-lang="fr">Remplacement rapide de matériel informatique, maintenance serveur, service d'équipements réseau et support d'infrastructure IT pour vos équipements basés aux Pays-Bas.</span>
+            <span class="lang-content" data-lang="it">Sostituzione rapida di hardware informatico, manutenzione server, servizio apparecchiature di rete e supporto infrastruttura IT per le vostre apparecchiature nei Paesi Bassi.</span>
+            <span class="lang-content" data-lang="pl">Szybka wymiana sprzętu komputerowego, konserwacja serwerów, serwis urządzeń sieciowych i wsparcie infrastruktury IT dla Twojego sprzętu w Holandii.</span>
+            <span class="lang-content" data-lang="uk">Швидка заміна комп'ютерного обладнання, обслуговування серверів, сервіс мережевого устаткування та підтримка IT-інфраструктури для вашого обладнання в Нідерландах.</span>
+            <span class="lang-content" data-lang="es">Reemplazo rápido de hardware informático, mantenimiento de servidores, servicio de equipos de red y soporte de infraestructura IT para sus equipos en los Países Bajos.</span>
+            <span class="lang-content" data-lang="ro">Înlocuire rapidă de hardware de calculator, întreținere servere, service echipamente de rețea și suport infrastructură IT pentru echipamentele dvs. din Olanda.</span>
+          </p>
+        </div>
+        
+        <div class="service-card">
+          <div class="service-icon">🌐</div>
+          <h3>
+            <span class="lang-content active" data-lang="en">Remote Diagnostics</span>
+            <span class="lang-content" data-lang="nl">Remote Diagnostiek</span>
+            <span class="lang-content" data-lang="de">Ferndiagnose</span>
+            <span class="lang-content" data-lang="fr">Diagnostic à Distance</span>
+            <span class="lang-content" data-lang="it">Diagnostica Remota</span>
+            <span class="lang-content" data-lang="pl">Diagnostyka Zdalna</span>
+            <span class="lang-content" data-lang="uk">Віддалена Діагностика</span>
+            <span class="lang-content" data-lang="es">Diagnóstico Remoto</span>
+            <span class="lang-content" data-lang="ro">Diagnostic la Distanță</span>
+          </h3>
+          <p>
+            <span class="lang-content active" data-lang="en">Professional remote troubleshooting, network testing, server diagnostics, and performance monitoring for your Netherlands-hosted equipment.</span>
+            <span class="lang-content" data-lang="nl">Professionele remote probleemoplossing, netwerk testen, server diagnostiek en prestatie monitoring voor uw in Nederland gehoste apparatuur.</span>
+            <span class="lang-content" data-lang="de">Professionelle Fernfehlerbehebung, Netzwerktests, Serverdiagnose und Leistungsüberwachung für Ihre in den Niederlanden gehostete Ausrüstung.</span>
+            <span class="lang-content" data-lang="fr">Dépannage à distance professionnel, tests réseau, diagnostic serveur et surveillance des performances pour votre équipement hébergé aux Pays-Bas.</span>
+            <span class="lang-content" data-lang="it">Risoluzione professionale dei problemi da remoto, test di rete, diagnostica del server e monitoraggio delle prestazioni per le vostre apparecchiature ospitate nei Paesi Bassi.</span>
+            <span class="lang-content" data-lang="pl">Profesjonalne zdalne rozwiązywanie problemów, testowanie sieci, diagnostyka serwerów i monitorowanie wydajności dla Twojego sprzętu hostowanego w Holandii.</span>
+            <span class="lang-content" data-lang="uk">Професійне віддалене усунення несправностей, тестування мережі, діагностика серверів та моніторинг продуктивності для вашого обладнання, розміщеного в Нідерландах.</span>
+            <span class="lang-content" data-lang="es">Solución profesional de problemas remota, pruebas de red, diagnóstico de servidores y monitoreo de rendimiento para su equipo alojado en los Países Bajos.</span>
+            <span class="lang-content" data-lang="ro">Depanare profesională la distanță, testarea rețelei, diagnosticarea serverelor și monitorizarea performanței pentru echipamentele dvs. găzduite în Olanda.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">
+        <span class="lang-content active" data-lang="en">Why Choose FreshPC Cloud</span>
+        <span class="lang-content" data-lang="nl">Waarom FreshPC Cloud</span>
+        <span class="lang-content" data-lang="de">Warum FreshPC Cloud</span>
+        <span class="lang-content" data-lang="fr">Pourquoi Choisir FreshPC Cloud</span>
+      </h2>
+      <div class="features-grid">
+        <div class="feature">
+          <div class="feature-icon">⚡</div>
+          <h3>
+            <span class="lang-content active" data-lang="en">24/7 Availability</span>
+            <span class="lang-content" data-lang="nl">24/7 Beschikbaarheid</span>
+            <span class="lang-content" data-lang="de">24/7 Verfügbarkeit</span>
+            <span class="lang-content" data-lang="fr">Disponibilité 24/7</span>
+          </h3>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🌍</div>
+          <h3>
+            <span class="lang-content active" data-lang="en">Netherlands Coverage</span>
+            <span class="lang-content" data-lang="nl">Nederlandse Dekking</span>
+            <span class="lang-content" data-lang="de">Niederlande-Abdeckung</span>
+            <span class="lang-content" data-lang="fr">Couverture Pays-Bas</span>
+            <span class="lang-content" data-lang="it">Copertura Olanda</span>
+            <span class="lang-content" data-lang="pl">Pokrycie Holandia</span>
+            <span class="lang-content" data-lang="uk">Покриття Нідерланди</span>
+            <span class="lang-content" data-lang="es">Cobertura Países Bajos</span>
+            <span class="lang-content" data-lang="ro">Acoperire Olanda</span>
+          </h3>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">👥</div>
+          <h3>
+            <span class="lang-content active" data-lang="en">Certified Professionals</span>
+            <span class="lang-content" data-lang="nl">Gecertificeerde Professionals</span>
+            <span class="lang-content" data-lang="de">Zertifizierte Profis</span>
+            <span class="lang-content" data-lang="fr">Professionnels Certifiés</span>
+          </h3>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">📱</div>
+          <h3>
+            <span class="lang-content active" data-lang="en">Real-Time Tracking</span>
+            <span class="lang-content" data-lang="nl">Real-Time Tracking</span>
+            <span class="lang-content" data-lang="de">Echtzeit-Verfolgung</span>
+            <span class="lang-content" data-lang="fr">Suivi Temps Réel</span>
+          </h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>
+            <span class="lang-content active" data-lang="en">Contact</span>
+            <span class="lang-content" data-lang="nl">Contact</span>
+            <span class="lang-content" data-lang="de">Kontakt</span>
+            <span class="lang-content" data-lang="fr">Contact</span>
+          </h4>
+          <p>admin@freshpccloud.nl</p>
+          <p>
+            <span class="lang-content active" data-lang="en">Available 24/7</span>
+            <span class="lang-content" data-lang="nl">24/7 Beschikbaar</span>
+            <span class="lang-content" data-lang="de">24/7 Verfügbar</span>
+            <span class="lang-content" data-lang="fr">Disponible 24/7</span>
+          </p>
+        </div>
+        <div class="footer-section">
+          <h4>
+            <span class="lang-content active" data-lang="en">Services</span>
+            <span class="lang-content" data-lang="nl">Diensten</span>
+            <span class="lang-content" data-lang="de">Dienstleistungen</span>
+            <span class="lang-content" data-lang="fr">Services</span>
+          </h4>
+          <p>
+            <span class="lang-content active" data-lang="en">IT Support</span>
+            <span class="lang-content" data-lang="nl">IT Ondersteuning</span>
+            <span class="lang-content" data-lang="de">IT-Support</span>
+            <span class="lang-content" data-lang="fr">Support IT</span>
+          </p>
+          <p>
+            <span class="lang-content active" data-lang="en">Network Management</span>
+            <span class="lang-content" data-lang="nl">Netwerk Beheer</span>
+            <span class="lang-content" data-lang="de">Netzwerk-Management</span>
+            <span class="lang-content" data-lang="fr">Gestion Réseau</span>
+          </p>
+        </div>
+        <div class="footer-section">
+          <h4>
+            <span class="lang-content active" data-lang="en">Coverage</span>
+            <span class="lang-content" data-lang="nl">Dekking</span>
+            <span class="lang-content" data-lang="de">Abdeckung</span>
+            <span class="lang-content" data-lang="fr">Couverture</span>
+          </h4>
+          <p>
+            <span class="lang-content active" data-lang="en">Netherlands Data Centers</span>
+            <span class="lang-content" data-lang="nl">Nederlandse Datacenters</span>
+            <span class="lang-content" data-lang="de">Niederländische Rechenzentren</span>
+            <span class="lang-content" data-lang="fr">Centres de Données Néerlandais</span>
+            <span class="lang-content" data-lang="it">Data Center Olandesi</span>
+            <span class="lang-content" data-lang="pl">Holenderskie Centra Danych</span>
+            <span class="lang-content" data-lang="uk">Нідерландські Дата-Центри</span>
+            <span class="lang-content" data-lang="es">Centros de Datos Holandeses</span>
+            <span class="lang-content" data-lang="ro">Centre de Date Olandeze</span>
+          </p>
+        </div>
+      </div>
+      <p>&copy; 2025 FreshPC Cloud. 
+        <span class="lang-content active" data-lang="en">All rights reserved.</span>
+        <span class="lang-content" data-lang="nl">Alle rechten voorbehouden.</span>
+        <span class="lang-content" data-lang="de">Alle Rechte vorbehalten.</span>
+        <span class="lang-content" data-lang="fr">Tous droits réservés.</span>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // Auto language detection based on browser
+    document.addEventListener('DOMContentLoaded', function() {
+      const langContents = document.querySelectorAll('.lang-content');
+      
+      // Detect browser language
+      const browserLang = navigator.language || navigator.userLanguage;
+      const langCode = browserLang.split('-')[0].toLowerCase();
+      
+      // Supported languages
+      const supportedLangs = ['en', 'nl', 'de', 'fr', 'it', 'pl', 'uk', 'es', 'ro'];
+      const selectedLang = supportedLangs.includes(langCode) ? langCode : 'en';
+      
+      // Update content visibility
+      langContents.forEach(content => {
+        content.classList.remove('active');
+        if (content.getAttribute('data-lang') === selectedLang) {
+          content.classList.add('active');
+        }
+      });
+      
+      // Update HTML lang attribute
+      document.getElementById('html-lang').setAttribute('lang', selectedLang);
+    });
+  </script>
+</body>
+</html>

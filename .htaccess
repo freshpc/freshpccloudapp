@@ -1,0 +1,11 @@
+# .htaccess v4 | Changes: Add rewrite for api/auth/status | est lines: ~20
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^login$ login.php [QSA,L]
+RewriteRule ^admin$ admin.php [QSA,L]
+RewriteRule ^api/clients$ api/clients.php [QSA,L]
+RewriteRule ^api/clients/([0-9]+)$ api/clients.php [QSA,L]
+RewriteRule ^api/auth/login$ api/auth/login.php [QSA,L]
+RewriteRule ^api/auth/status$ api/auth/status.php [QSA,L]
