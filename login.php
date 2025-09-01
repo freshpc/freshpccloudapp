@@ -174,7 +174,7 @@ require_once 'config.php';
             const alertDiv = document.getElementById('alert');
             
             try {
-                const response = await fetch('/api/auth/login', {
+                const response = await fetch('/api/auth/login.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
